@@ -25,7 +25,6 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
   let retries = 0;
 
   const dbResolver = (() => {
-    recordNonFatalError('this is a test')
     return openDatabase();
   })();
 
