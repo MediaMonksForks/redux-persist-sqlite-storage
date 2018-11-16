@@ -1,15 +1,16 @@
 /**
  * SQLite store adaptor designed to use with redux-persist. This small piece of code can also be used
  * as an interface between application and SQLite storage. Functions signature are same as AsyncStorage.
- * 
+ *
  * getItem(key);
  * setitem(key, value);
  * removeItem(key);
  * getAllKeys();
  * clear();
- * 
+ *
  * All the method above returns Promise object.
  */
+import {recordNonFatalError} from './crashlytics';
 
 const noop = () => {}
 
@@ -21,23 +22,45 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
     location: 'default'
   };
 
+  let retries = 0;
+
   const dbResolver = (() => {
+    recordNonFatalError('this is a test')
+    return openDatabase();
+  })();
+
+  const openDatabase = () => {
     return new Promise((resolve, reject) => {
       SQLite.openDatabase({...defaultConfig, ...config}, (db) => {
         db.transaction( tx => {
           tx.executeSql(`CREATE TABLE IF NOT EXISTS store (key, value)`);
         }, error => {
           console.warn('Unable to create table', error);
+          recordNonFatalError('PersistError', 'Unable to create table' + error)
           reject();
         }, () => {
           resolve(db);
         });
       }, error => {
+        recordNonFatalError('PersistError', 'Unable to open database', error)
         console.warn('Unable to open database', error)
         reject();
       });
+    }).catch(error => {
+      retries++;
+      if(retries < 5) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(openDatabase());
+          }, 2000)
+        });
+      } else {
+        recordNonFatalError('PersistError', 'Unable to open database in 5 tries')
+        console.warn('Unable to open database in 5 tries', error)
+        reject();
+      }
     });
-  })();
+  };
 
   function getItem(key, cb = noop) {
     return new Promise((resolve, reject) => {
@@ -55,12 +78,13 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
             }
           );
         });
-      }).catch(() => {
+      }).catch((err) => {
+        cb(err, DB_CLOSED_MESSAGE);
         reject(DB_CLOSED_MESSAGE);
       });
     });
   }
-  
+
   function setItem(key, value, cb = noop) {
     return new Promise((resolve, reject) => {
       dbResolver.then( db => {
@@ -90,12 +114,13 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
             }
           );
         });
-      }).catch(() => {
+      }).catch((err) => {
+        cb(err, DB_CLOSED_MESSAGE);
         reject(DB_CLOSED_MESSAGE);
       });
     });
   }
-  
+
   function removeItem(key, cb = noop) {
     return new Promise((resolve, reject) => {
       dbResolver.then( db => {
@@ -112,12 +137,13 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
             }
           );
         });
-      }).catch(() => {
+      }).catch((err) => {
+        cb(err, DB_CLOSED_MESSAGE);
         reject(DB_CLOSED_MESSAGE);
       });
     });
   }
-  
+
   function getAllKeys(cb = noop) {
     return new Promise((resolve, reject) => {
       dbResolver.then( db => {
@@ -138,7 +164,8 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
             }
           );
         });
-      }).catch(() => {
+      }).catch((err) => {
+        cb(err, DB_CLOSED_MESSAGE);
         reject(DB_CLOSED_MESSAGE);
       });
     });
@@ -156,7 +183,8 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
             cb(err);
           });
         });
-      }).catch(() => {
+      }).catch((err) => {
+        cb(err, DB_CLOSED_MESSAGE);
         reject(DB_CLOSED_MESSAGE);
       });
     });
