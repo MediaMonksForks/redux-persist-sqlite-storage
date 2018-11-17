@@ -24,10 +24,6 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
 
   let retries = 0;
 
-  const dbResolver = (() => {
-    return openDatabase();
-  })();
-
   const openDatabase = () => {
     return new Promise((resolve, reject) => {
       SQLite.openDatabase({...defaultConfig, ...config}, (db) => {
@@ -60,6 +56,10 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
       }
     });
   };
+
+  const dbResolver = (() => {
+    return openDatabase();
+  })();
 
   function getItem(key, cb = noop) {
     return new Promise((resolve, reject) => {
