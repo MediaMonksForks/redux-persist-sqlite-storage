@@ -1,11 +1,10 @@
-import { Platform, Alert } from 'react-native';
+import { Platform } from 'react-native';
 import Fabric from 'react-native-fabric';
 import { toString } from 'lodash';
 
 const recordNonFatalError = (description, error) => {
   const { Crashlytics } = Fabric;
   const stringError =  toString(description) + ': ' + toString(error);
-  Alert.alert(stringError);
   if (Platform.OS === 'ios') {
     Crashlytics.recordError(stringError);
   } else {

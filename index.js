@@ -44,13 +44,14 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
     }).catch(error => {
       retries++;
       if(retries < 5) {
+        recordNonFatalError('PersistError', 'Retrying opening database ' + retries);
         return new Promise((resolve) => {
           setTimeout(() => {
             resolve(openDatabase());
-          }, 2000)
+          }, 1000)
         });
       } else {
-        recordNonFatalError('PersistError', 'Unable to open database in 5 tries')
+        recordNonFatalError('PersistError', 'Unable to open database in 5 tries');
         console.warn('Unable to open database in 5 tries', error)
         reject();
       }
