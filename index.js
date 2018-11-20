@@ -58,9 +58,7 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
     });
   };
 
-  const dbResolver = (() => {
-    return openDatabase();
-  })();
+  const dbResolver = openDatabase();
 
   function getItem(key, cb = noop) {
     return new Promise((resolve, reject) => {
