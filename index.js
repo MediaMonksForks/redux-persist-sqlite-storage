@@ -66,11 +66,12 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
       dbResolver.then( db => {
         db.transaction((tx) => {
           tx.executeSql(
-            'SELECT value FROM store WHERE key=?', [key + Math.random()],
+            'SELECT value FROM store WHERE key=?', [key],
             (tx, rs) => {
               console.log(rs);
               resolve(rs.rows.item(0).value);
-              cb(null, rs.rows.item(0).value);
+              // cb(null, rs.rows.item(0).value);
+              cb(null, undefined);
             },
             (tx, err) => {
               cb(err);
