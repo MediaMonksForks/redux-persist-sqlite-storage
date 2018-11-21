@@ -68,7 +68,7 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
           tx.executeSql(
             'SELECT value FROM store WHERE key=?', [key + Math.random()],
             (tx, rs) => {
-              console.log(result);
+              console.log(rs);
               resolve(rs.rows.item(0).value);
               cb(null, rs.rows.item(0).value);
             },
