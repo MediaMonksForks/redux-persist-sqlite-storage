@@ -1,6 +1,7 @@
 /**
- * SQLite store adaptor designed to use with redux-persist. This small piece of code can also be used
- * as an interface between application and SQLite storage. Functions signature are same as AsyncStorage.
+ * SQLite store adaptor designed to use with redux-persist. This small piece of code can also be
+ * used as an interface between application and SQLite storage. Functions signature are same as
+ * AsyncStorage.
  *
  * getItem(key);
  * setitem(key, value);
@@ -84,6 +85,7 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
   }
 
   function setItem(key, value, cb = noop) {
+    console.log(key);
     return new Promise((resolve, reject) => {
       dbResolver.then( db => {
         db.transaction((tx) => {
