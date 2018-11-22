@@ -70,8 +70,7 @@ export default function SQLiteStorage(SQLite = {}, config = {}) {
             (tx, rs) => {
               console.log(rs);
               resolve(rs.rows.item(0).value);
-              // cb(null, rs.rows.item(0).value);
-              cb(null, undefined);
+              cb(null, rs.rows.item(0).value);
             },
             (tx, err) => {
               cb(err);
